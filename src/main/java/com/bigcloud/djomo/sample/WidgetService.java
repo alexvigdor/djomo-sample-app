@@ -15,15 +15,17 @@
  *******************************************************************************/
 package com.bigcloud.djomo.sample;
 
-import java.util.Map;
 import java.util.UUID;
 
 import com.bigcloud.djomo.Models;
 import com.bigcloud.djomo.annotation.Parse;
 import com.bigcloud.djomo.annotation.Visit;
 import com.bigcloud.djomo.api.Model;
-import com.bigcloud.djomo.filter.TypeParserTransform;
-import com.bigcloud.djomo.filter.TypeVisitorTransform;
+import com.bigcloud.djomo.api.ObjectModel;
+import com.bigcloud.djomo.api.Parser;
+import com.bigcloud.djomo.api.Visitor;
+import com.bigcloud.djomo.api.parsers.ModelParser;
+import com.bigcloud.djomo.api.visitors.ModelVisitor;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -70,7 +72,7 @@ public class WidgetService {
 	@Path("collapse")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Widget collapse(@Parse(WidgetCollapser.class) @Valid Widget widget) {
+	public Widget collapse(@Parse(value = WidgetCollapser.class, path = "relatedWidgets[*]") @Valid Widget widget) {
 		dao.set(widget.id(), widget);
 		return widget;
 	}
@@ -96,16 +98,16 @@ public class WidgetService {
 	 * serialization.
 	 *
 	 */
-	public static class WidgetExpander extends TypeVisitorTransform<UUID> {
-		WidgetDao dao;
+	public static class WidgetExpander implements ModelVisitor<UUID> {
+		final WidgetDao dao;
 
 		public WidgetExpander(WidgetDao dao) {
 			this.dao = dao;
 		}
 
 		@Override
-		public Widget transform(UUID in) {
-			return dao.get(in);
+		public void visitModel(UUID id, Model<UUID> model, Visitor visitor) {
+			visitor.visit(dao.get(id));
 		}
 
 	}
@@ -115,17 +117,11 @@ public class WidgetService {
 	 * Deconstructs a nested widget model into component objects for storage with
 	 * uuid pointers during deserialization.
 	 * 
-	 * A parser that encounters an object structure when expecting a UUID will
-	 * return a Map; this transform takes that map and converts it to the
-	 * {@code Model<Widget>} it acquires during construction from the injected
-	 * Models. It leverages the WidgetDao injected thanks to JsonResolver to store
-	 * the nested objects, and feeds the UUID back into the normalized model for the
-	 * parent widget.
 	 *
 	 */
-	public static class WidgetCollapser extends TypeParserTransform<Map, UUID> {
-		Model<Widget> widgetModel;
-		WidgetDao dao;
+	public static class WidgetCollapser implements ModelParser<UUID> {
+		final ObjectModel<Widget> widgetModel;
+		final WidgetDao dao;
 
 		public WidgetCollapser(WidgetDao dao, Models models) {
 			this.widgetModel = models.get(Widget.class);
@@ -133,8 +129,8 @@ public class WidgetService {
 		}
 
 		@Override
-		public UUID transform(Map in) {
-			Widget w = widgetModel.convert(in);
+		public UUID parse(Model<UUID> model, Parser parser) {
+			Widget w = (Widget) parser.parse(widgetModel);
 			dao.set(w.id(), w);
 			return w.id();
 		}

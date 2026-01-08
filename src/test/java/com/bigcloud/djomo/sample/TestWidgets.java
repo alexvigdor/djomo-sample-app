@@ -20,8 +20,8 @@ import java.util.UUID;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTestNg;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import com.bigcloud.djomo.rs.JsonBodyReader;
 import com.bigcloud.djomo.rs.JsonBodyWriter;
@@ -68,7 +68,7 @@ public class TestWidgets extends JerseyTestNg.ContainerPerClassTest {
 		Assert.assertEquals(expandedTable, rt);
 	}
 
-	@Test(expected = BadRequestException.class)
+	@Test(expectedExceptions = BadRequestException.class)
 	public void testInvalidWidget() {
 		Widget wrong = new Widget(UUID.randomUUID(), "Legs", -4.0, 20.0, 4.0, 5.5, List.of());
 		target("/widgets").request(MediaType.APPLICATION_JSON)

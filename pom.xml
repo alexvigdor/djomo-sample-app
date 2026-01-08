@@ -23,20 +23,17 @@
 	<packaging>war</packaging>
 	<name>Sample djomo JAX-RS microservice app</name>
 	<properties>
-		<djomo.version>0.9.1</djomo.version>
-		<jetty.version>11.0.12</jetty.version>
-		<jersey.version>3.0.8</jersey.version>
+		<djomo.version>0.9.4</djomo.version>
+		<jetty.version>11.0.26</jetty.version>
+		<jersey.version>3.1.11</jersey.version>
+		<maven.compiler.release>16</maven.compiler.release>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
-				<configuration>
-					<source>16</source>
-					<target>16</target>
-				</configuration>
+				<version>3.14.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
@@ -49,15 +46,27 @@
 			<plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-war-plugin</artifactId>
-			    <version>3.3.2</version>
+			    <version>3.5.1</version>
 			    <configuration>
 	                <failOnMissingWebXml>false</failOnMissingWebXml>
 	            </configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.4</version>
+				<dependencies>
+				  <dependency>
+				    <groupId>org.apache.maven.surefire</groupId>
+				    <artifactId>surefire-testng</artifactId>
+				    <version>3.5.4</version>
+				  </dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.8</version>
+				<version>0.8.14</version>
 				<executions>
 					<execution>
 						<goals>
@@ -84,7 +93,7 @@
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.glassfish.jersey.inject</groupId>
@@ -105,6 +114,12 @@
 			<groupId>org.glassfish.jersey.test-framework.providers</groupId>
 			<artifactId>jersey-test-framework-provider-grizzly2</artifactId>
 			<version>${jersey.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>7.9.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
